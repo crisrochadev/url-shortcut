@@ -39,18 +39,8 @@ class ShortenerController extends Controller
         return redirect()->away($link->url);
     }
 
-
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-
-    /**
-     * Esta função armazena uma URL abreviada no banco de dados após validar a URL de entrada e gerar
+     * Metodo responsavel por armazenar uma URL abreviada no banco de dados após validar a URL de entrada e gerar
      * uma slug único.
      *
      * @param Request usado para recuperar a entrada de URL do usuário.
@@ -89,8 +79,14 @@ class ShortenerController extends Controller
         }
     }
 
+
     /**
-     * Display a listing of the resource.
+     * Método resposável por recuperar todos os links encurtados e verifica se eles expiraram, retornando um JSON
+     * resposta.
+     *
+     * Uma resposta JSON contendo todos os registros do modelo "Shortener", com um
+     * atributo "expirado" adicional adicionado a cada registro com base em sua "data_de_expiração"
+     * atributo é menor que a data e hora atuais.
      */
     public function show()
     {
@@ -108,6 +104,15 @@ class ShortenerController extends Controller
         return response()->json($links);
     }
 
+    /**
+     * Método responsável por reativar um link encurtado atualizando seu slug e data de validade
+     *
+     * @param $id O parâmetro "id" é o identificador exclusivo de um registro do Shortener no banco de dados. Isto
+     * é usado para recuperar o registro e atualizar suas propriedades ao reativar um link.
+     *
+     * retorna uma resposta JSON com um status de sucesso e uma mensagem de erro
+     * ou os dados do link reativado.
+     */
     public function reactivate($id)
     {
         $link = Shortener::where('id', $id)
@@ -125,8 +130,15 @@ class ShortenerController extends Controller
 
         return response()->json(['success' => true, 'data' => $link]);
     }
+
     /**
-     * Show the form for editing the specified resource.
+     * Método responsável por desabiltar um link encurtado atualizando seu slug e data de validade
+     *
+     * @param $id O parâmetro "id" é o identificador exclusivo de um registro do Shortener no banco de dados. Isto
+     * é usado para recuperar o registro e atualizar suas propriedades ao desabiltar um link.
+     *
+     * retorna uma resposta JSON com um status de sucesso e uma mensagem de erro
+     * ou os dados do link desabilitado.
      */
     public function disable($id)
     {
@@ -144,6 +156,15 @@ class ShortenerController extends Controller
         return response()->json(['success' => true, 'message' => "The link {$link->slug} was disabled successfully"]);
     }
 
+    /**
+     * Método responsável por habilitar um link encurtado atualizando seu slug e data de validade
+     *
+     * @param $id O parâmetro "id" é o identificador exclusivo de um registro do Shortener no banco de dados. Isto
+     * é usado para recuperar o registro e atualizar suas propriedades ao habilitar um link.
+     *
+     * retorna uma resposta JSON com um status de sucesso e uma mensagem de erro
+     * ou os dados do link habilitado.
+     */
     public function enable($id)
     {
         $link = Shortener::where('id', $id)
@@ -160,21 +181,7 @@ class ShortenerController extends Controller
 
         return response()->json(['success' => true, 'message' => "The link {$link->slug} was enabled successfully"]);
     }
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Shortener $shortener)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Shortener $shortener)
-    {
-        //
-    }
 
     private function hash($id)
     {
