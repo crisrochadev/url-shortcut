@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('shorteners', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id')->unsigned();
             $table->string('url')->unique();
             $table->string('slug')->unique();
             $table->timestamps();
             $table->boolean('disable')->default(false);
-            $table->date('expiration_date');
+            $table->datetime('expiration_date');
         });
     }
 

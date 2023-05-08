@@ -2,62 +2,49 @@
 
 namespace App\Http\Controllers;
 
-
-
-
-use App\Models\Shortener;
 use App\Services\ShortenerServices;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
-use Log;
 use App\Http\Response;
 use App\Http\Requests\ShortenerRequest;
 
 class ShortenerController extends Controller
 {
 
+    /**
+     * @var ShortenerServices
+     */
     protected $shortenerServices;
-    public function __construct(ShortenerServices $shortenerServices){
+    public function __construct(ShortenerServices $shortenerServices)
+    {
         $this->shortenerServices = $shortenerServices;
     }
-    /**
-     * Metodo responsável por redirecionar para uma URL com base em um determinado slug, caso exista e não tenha expirado ou
-     * desativado, caso contrário, redirecionar para uma página 404.
-     *
-     * @param  $slug O parâmetro slug é uma variável de string que representa o identificador único para
-     * uma URL abreviada. Ele é usado para consultar o banco de dados e recuperar o URL completo correspondente para
-     * redirecionamento.
-     *
-     *  Um link curto válido com o slug fornecido for encontrado e não tiver expirado ou
-     * desativado, a função redirecionará o usuário para a URL correspondente. Se o link não for encontrado
-     * ou expirou ou foi desativado, a função redirecionará o usuário para uma página de erro 404.
-     */
 
-    public function index($slug)
+    /**
+     * Método responsável por enviar o link através do seu slug
+     *
+     * @param string $slug
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(string $slug): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->getBySlug($slug);
-        if(!$response['success']){
+        if (!$response['success']) {
             return Response::notFound($response);
         }
         return Response::success($response);
     }
 
+
     /**
-     * Metodo responsavel por armazenar uma URL abreviada no banco de dados após validar a URL de entrada e gerar
-     * uma slug único.
+     * Método responsável por criar um novo link
      *
-     * @param Request usado para recuperar a entrada de URL do usuário.
-     *
-     *  Se validação falhar, uma resposta JSON com as mensagens de erro de validação será retornada.
-     * Se o bloco try for bem-sucedido, uma resposta JSON com o objeto Shortener recém-criado será
-     * devolvida. Se uma exceção for capturada, uma resposta JSON com um status de sucesso falso e o erro
-     * mensagem é retornada.
+     * @param ShortenerRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(ShortenerRequest $request)
+    public function store(ShortenerRequest $request): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->createShortcut($request->url);
-        if(!$response['success']){
+        if (!$response['success']) {
             return Response::notFound($response);
         }
         return Response::created($response);
@@ -65,61 +52,46 @@ class ShortenerController extends Controller
 
 
     /**
-     * Método resposável por recuperar todos os links encurtados e verifica se eles expiraram, retornando um JSON
-     * resposta.
+     * Método responsável por retornar os links conforme paginação
      *
-     * Uma resposta JSON contendo todos os registros do modelo "Shortener", com um
-     * atributo "expirado" adicional adicionado a cada registro com base em sua "data_de_expiração"
-     * atributo é menor que a data e hora atuais.
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show()
+    public function show(): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->get();
-        if(!$response['success']){
+        if (!$response['success']) {
             return Response::notFound($response);
         }
         return Response::success($response);
     }
 
     /**
-     * Método responsável por reativar um link encurtado atualizando seu slug e data de validade
+     * Método responsável por reativar um link expirado
      *
-     * @param $id O parâmetro "id" é o identificador exclusivo de um registro do Shortener no banco de dados. Isto
-     * é usado para recuperar o registro e atualizar suas propriedades ao reativar um link.
-     *
-     * retorna uma resposta JSON com um status de sucesso e uma mensagem de erro
-     * ou os dados do link reativado.
+     * @param [type] $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function reactivate($id)
+    public function reactivate($id): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->reactivate($id);
-        if(!$response['success']){
+        if (!$response['success']) {
             return Response::notFound($response);
         }
         return Response::success($response);
     }
 
     /**
-     * Método responsável por desabiltar um link encurtado atualizando seu slug e data de validade
+     * Método responsável por desabilitar um link
      *
-     * @param $id O parâmetro "id" é o identificador exclusivo de um registro do Shortener no banco de dados. Isto
-     * é usado para recuperar o registro e atualizar suas propriedades ao desabiltar um link.
-     *
-     * retorna uma resposta JSON com um status de sucesso e uma mensagem de erro
-     * ou os dados do link desabilitado.
+     * @param [type] $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function disable($id)
+    public function disable($id): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->disable($id);
-        if(!$response['success']){
+        if (!$response['success']) {
             return Response::notFound($response);
         }
         return Response::success($response);
     }
-
-
-
-
-
-
 }

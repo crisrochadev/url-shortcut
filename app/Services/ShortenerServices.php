@@ -9,37 +9,77 @@ use Carbon\Carbon;
 
 class ShortenerServices
 {
+    /**
+     *
+     * @var ShortenerRepository
+     */
     protected $repository;
 
     public function __construct(ShortenerRepository $shortenerRepository)
     {
         $this->repository = $shortenerRepository;
     }
-
-    public function get()
+    /**
+     * Método responsável pode trazer os links do repositório
+     *
+     * @return array
+     */
+    public function get(): array
     {
         return $this->repository->getAll();
     }
-    public function createShortcut(string $url)
+
+    /**
+     * Método responsável por enviar uma url para o repositorio criar um link e devolver a resposta.
+     *
+     * @param string $url
+     * @return array
+     */
+    public function createShortcut(string $url): array
     {
 
         return $this->repository->createNewShortcut($url, $this->hash());
     }
 
-    public function getBySlug(string $slug)
+    /**
+     * Método responsável por trazer o link pelo seu id
+     *
+     * @param string $slug
+     * @return array
+     */
+    public function getBySlug(string $slug): array
     {
         return $this->repository->getShortcutBySlug($slug);
     }
 
-    public function reactivate(string $id)
+    /**
+     * Método responsável por enviar um id para o repositorio reativar um link expirado com um novo
+     * e devolver a resposta.
+     *
+     * @param string $id
+     * @return array
+     */
+    public function reactivate(string $id): array
     {
         return $this->repository->reactivateShortcut($id, $this->hash());
     }
-    public function disable(string $id)
+    /**
+     * Método responsável por enviar um id para o repositório desabiliar um link e devolver a resposta.
+     *
+     * @param string $id
+     * @return array
+     */
+    public function disable(string $id): array
     {
         return $this->repository->disableShortcut($id);
     }
-    private function hash()
+
+    /**
+     * Método responsável por criar um slug, usando Hashids
+     *
+     * @return string
+     */
+    private function hash(): string
     {
         do {
             $id = uniqid();
