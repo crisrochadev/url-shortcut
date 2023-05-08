@@ -27,7 +27,7 @@ HASHIDS_MIN_LENGTH=8
     <thead>
         <tr>
             <th>URL</th>
-            <th colspan="2">http://localhost:8000<th>
+            <th colspan="3">http://localhost:8000<th>
         </tr>
         <tr>
             <th>Método</th>
