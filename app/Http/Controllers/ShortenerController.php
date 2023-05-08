@@ -36,15 +36,11 @@ class ShortenerController extends Controller
 
     public function index($slug)
     {
-        $link = Shortener::where('slug', $slug)
-            ->where('expiration_date', '>', now())
-            ->where('disable', '=', false)
-            ->first();
-        if (!$link) {
-            return Response::notFound('Página não encontrada');
+        $response = $this->shortenerServices->getBySlug($slug);
+        if(!$response['success']){
+            return Response::notFound($response);
         }
-
-        return Response::success('',$link);
+        return Response::success($response);
     }
 
     /**
@@ -60,23 +56,11 @@ class ShortenerController extends Controller
      */
     public function store(ShortenerRequest $request)
     {
-        try {
-            do {
-                $id = uniqid();
-                $slug = $this->hash($id);
-            } while (Shortener::where('slug', $slug)->exists());
-
-            $link = new Shortener;
-            $link->url = $request->url;
-            $link->slug = $slug;
-            $link->expiration_date = now()->addDays(7);
-            $link->save();
-
-            return Response::success('',$link);
-        } catch (\Exception $e) {
-            Log::error($e);
-            return Response::error($e->getMessage());
+        $response = $this->shortenerServices->createShortcut($request->url);
+        if(!$response['success']){
+            return Response::notFound($response);
         }
+        return Response::created($response);
     }
 
 
@@ -90,18 +74,11 @@ class ShortenerController extends Controller
      */
     public function show()
     {
-        $links = Shortener::all();
-        $now = now();
-
-        foreach ($links as $link) {
-            if ($link->expiration_date < $now) {
-                $link->expired = true;
-            } else {
-                $link->expired = false;
-            }
+        $response = $this->shortenerServices->get();
+        if(!$response['success']){
+            return Response::notFound($response);
         }
-
-        return Response::success('',$links);
+        return Response::success($response);
     }
 
     /**
@@ -115,20 +92,11 @@ class ShortenerController extends Controller
      */
     public function reactivate($id)
     {
-        $link = Shortener::where('id', $id)
-            ->where('expiration_date', '<', now())
-            ->where('disable', '=', false)
-            ->first();
-
-        if (!$link) {
-            return Response::notFound('Esse link não pode ser reativado!');
+        $response = $this->shortenerServices->reactivate($id);
+        if(!$response['success']){
+            return Response::notFound($response);
         }
-
-        $link->slug = $this->hash($id);
-        $link->expiration_date = now()->addDays(7);
-        $link->save();
-
-        return Response::success('',$link);
+        return Response::success($response);
     }
 
     /**
@@ -142,61 +110,16 @@ class ShortenerController extends Controller
      */
     public function disable($id)
     {
-        $link = Shortener::where('id', $id)
-            ->where('disable', '=', false)
-            ->first();
-
-        if (!$link) {
-            return Response::notFound('Esse link não pode ser desativado!');
+        $response = $this->shortenerServices->disable($id);
+        if(!$response['success']){
+            return Response::notFound($response);
         }
-
-        $link->disable = true;
-        $link->save();
-
-        return Response::success("O link {$link->slug} foi desativado com sucesso!");
-    }
-
-    /**
-     * Método responsável por habilitar um link encurtado atualizando seu slug e data de validade
-     *
-     * @param $id O parâmetro "id" é o identificador exclusivo de um registro do Shortener no banco de dados. Isto
-     * é usado para recuperar o registro e atualizar suas propriedades ao habilitar um link.
-     *
-     * retorna uma resposta JSON com um status de sucesso e uma mensagem de erro
-     * ou os dados do link habilitado.
-     */
-    public function enable($id)
-    {
-        $link = Shortener::where('id', $id)
-            ->where('expiration_date', '>', now())
-            ->where('disable', '=', true)
-            ->first();
-
-        if (!$link) {
-            return Response::success("Esse link não pode ser reativado!");
-        }
-
-        $link->disable = false;
-        $link->save();
-
-        return Response::success("O link {$link->slug} foi ativado com sucesso!");
+        return Response::success($response);
     }
 
 
-    /**
-     * Método responável por retornar o id do link codificado com a biblioteca Hashids
-     *
-     * @param $id é o parâmetro de entrada para a função hash. É usado para gerar um hash único
-     * valor para a entrada fornecida.
-     *
-     * $hashids hashed string representation of the input `` using the Hashids library. The output
-     * is encoded in hexadecimal format.
-     */
-    private function hash($id)
-    {
-        $hashids = new Hashids(env('HASHIDS_SALT'), env('HASHIDS_MIN_LENGTH'));
-        return $hashids->encodeHex($id);
-    }
+
+
 
 
 }
