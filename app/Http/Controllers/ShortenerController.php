@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use Hashids\Hashids;
+
+
 
 use App\Models\Shortener;
+use App\Services\ShortenerServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Log;
+use App\Http\Response;
+use App\Http\Requests\ShortenerRequest;
 
 class ShortenerController extends Controller
 {
 
+    protected $shortenerServices;
+    public function __construct(ShortenerServices $shortenerServices){
+        $this->shortenerServices = $shortenerServices;
+    }
     /**
      * Metodo responsável por redirecionar para uma URL com base em um determinado slug, caso exista e não tenha expirado ou
      * desativado, caso contrário, redirecionar para uma página 404.
@@ -33,10 +41,10 @@ class ShortenerController extends Controller
             ->where('disable', '=', false)
             ->first();
         if (!$link) {
-            return redirect('http://localhost:8080/404');
+            return Response::notFound('Página não encontrada');
         }
 
-        return redirect()->away($link->url);
+        return Response::success('',$link);
     }
 
     /**
@@ -50,16 +58,8 @@ class ShortenerController extends Controller
      * devolvida. Se uma exceção for capturada, uma resposta JSON com um status de sucesso falso e o erro
      * mensagem é retornada.
      */
-    public function store(Request $request)
+    public function store(ShortenerRequest $request)
     {
-        $validate = Validator::make($request->all(), [
-            'url' => 'required|url|max:255'
-        ]);
-
-        if ($validate->fails()) {
-            return response()->json($validate->messages());
-        }
-
         try {
             do {
                 $id = uniqid();
@@ -72,10 +72,10 @@ class ShortenerController extends Controller
             $link->expiration_date = now()->addDays(7);
             $link->save();
 
-            return response()->json($link);
+            return Response::success('',$link);
         } catch (\Exception $e) {
             Log::error($e);
-            return response()->json(['success' => false, 'error' => $e->getMessage()]);
+            return Response::error($e->getMessage());
         }
     }
 
@@ -101,7 +101,7 @@ class ShortenerController extends Controller
             }
         }
 
-        return response()->json($links);
+        return Response::success('',$links);
     }
 
     /**
@@ -121,14 +121,14 @@ class ShortenerController extends Controller
             ->first();
 
         if (!$link) {
-            return response()->json(['success' => false, 'message' => 'Link not found or cannot be reactivated']);
+            return Response::notFound('Esse link não pode ser reativado!');
         }
 
         $link->slug = $this->hash($id);
         $link->expiration_date = now()->addDays(7);
         $link->save();
 
-        return response()->json(['success' => true, 'data' => $link]);
+        return Response::success('',$link);
     }
 
     /**
@@ -147,13 +147,13 @@ class ShortenerController extends Controller
             ->first();
 
         if (!$link) {
-            return response()->json(['success' => false, 'message' => 'Link not found or cannot be disabled']);
+            return Response::notFound('Esse link não pode ser desativado!');
         }
 
         $link->disable = true;
         $link->save();
 
-        return response()->json(['success' => true, 'message' => "The link {$link->slug} was disabled successfully"]);
+        return Response::success("O link {$link->slug} foi desativado com sucesso!");
     }
 
     /**
@@ -173,20 +173,30 @@ class ShortenerController extends Controller
             ->first();
 
         if (!$link) {
-            return response()->json(['success' => false, 'message' => 'Link not found or cannot be enabled']);
+            return Response::success("Esse link não pode ser reativado!");
         }
 
         $link->disable = false;
         $link->save();
 
-        return response()->json(['success' => true, 'message' => "The link {$link->slug} was enabled successfully"]);
+        return Response::success("O link {$link->slug} foi ativado com sucesso!");
     }
 
 
+    /**
+     * Método responável por retornar o id do link codificado com a biblioteca Hashids
+     *
+     * @param $id é o parâmetro de entrada para a função hash. É usado para gerar um hash único
+     * valor para a entrada fornecida.
+     *
+     * $hashids hashed string representation of the input `` using the Hashids library. The output
+     * is encoded in hexadecimal format.
+     */
     private function hash($id)
     {
         $hashids = new Hashids(env('HASHIDS_SALT'), env('HASHIDS_MIN_LENGTH'));
         return $hashids->encodeHex($id);
     }
+
 
 }
