@@ -27,38 +27,38 @@ HASHIDS_MIN_LENGTH=8
     <thead>
         <tr>
             <th>URL</th>
-            <th colspan="3">http://localhost:8000<th>
+            <th colspan="3">http://localhost:8000 - servidor local</th>
         </tr>
         <tr>
             <th>Método</th>
-            <th>Endpoint<th>
+            <th >Endpoint</th>
             <th>Descrição</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td>GET</td>
-            <td>/links?page=2<td>
+            <td>/links?page=2</td>
             <td>Tráz apenas os links habilitados</td>
         </tr>
         <tr>
             <td>POST</td>
-            <td>/links<td>
+            <td>/links</td>
             <td>Cria um novo link encurtado</td>
         </tr>
         <tr>
             <td>GET</td>
-            <td>/{slug}<td>
+            <td>/{slug}</td>
             <td>Traz o link pelo slug</td>
         </tr>
         <tr>
             <td>PUT</td>
-            <td>/disable/{id}<td>
+            <td>/disable/{id}</td>
             <td>Desabilita um link pelo id</td>
         </tr>
         <tr>
             <td>PUT</td>
-            <td>/reactivate/{id}<td>
+            <td>/reactivate/{id}</td>
             <td>Reativa um link expirado</td>
         </tr>
     </tbody>
