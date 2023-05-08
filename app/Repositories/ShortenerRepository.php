@@ -120,7 +120,7 @@ class ShortenerRepository
 
         try {
             $link = $this->entity->where('id', $id)
-                ->where('disable', '=', true)
+                ->where('disable', '=', false)
                 ->first();
             if (!$link) {
                 return [
