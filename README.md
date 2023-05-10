@@ -27,11 +27,11 @@ HASHIDS_MIN_LENGTH=8
     <thead>
         <tr>
             <th>URL</th>
-            <th colspan="3">http://localhost:8000<th>
+            <th colspan="3">http://localhost:8000 - servidor local</th>
         </tr>
         <tr>
             <th>Método</th>
-            <th>Endpoint<th>
+            <th >Endpoint</th>
             <th>Descrição</th>
         </tr>
     </thead>
@@ -43,7 +43,7 @@ HASHIDS_MIN_LENGTH=8
         </tr>
         <tr>
             <td>POST</td>
-            <td>/links<td>
+            <td>/links</td>
             <td>Cria um novo link encurtado</td>
         </tr>
         <tr>
