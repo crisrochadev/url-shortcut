@@ -64,7 +64,7 @@ HASHIDS_MIN_LENGTH=8
         </tr>
         <tr>
             <td>PUT</td>
-            <td>/links/reactivate/{id}<td>
+            <td>/links/reactivate/{id}</td>
             <td>Reativa um link expirado</td>
         </tr>
     </tbody>
