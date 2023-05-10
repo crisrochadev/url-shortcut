@@ -28,7 +28,15 @@ class ShortenerServices
     {
         return $this->repository->getAll();
     }
-
+       /**
+     * Método responsável pode trazer os links desabilitados do repositório
+     *
+     * @return array
+     */
+    public function getDisabled(): array
+    {
+        return $this->repository->getAllDisabled();
+    }
     /**
      * Método responsável por enviar uma url para o repositorio criar um link e devolver a resposta.
      *

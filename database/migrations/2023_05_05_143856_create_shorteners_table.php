@@ -15,9 +15,9 @@ return new class extends Migration
             $table->increments('id')->unsigned();
             $table->string('url')->unique();
             $table->string('slug')->unique();
-            $table->timestamps();
-            $table->boolean('disable')->default(false);
             $table->datetime('expiration_date');
+            $table->softDeletes();
+            $table->timestamps();
         });
     }
 

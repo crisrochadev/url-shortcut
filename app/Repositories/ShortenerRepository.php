@@ -31,18 +31,58 @@ class ShortenerRepository
     public function getAll(): array
     {
         try {
+            $perPage = request('perPage', 2);
+            $orderBy = request('orderBy', 'DESC');
+            $filter = request('filter', '');
             $now = new Carbon();
             $links = $this->entity
                 ->select('*', DB::raw('IF(expiration_date < "' . $now . '", true, false) AS expired'))
-                ->paginate(3);
+                ->where('url', 'like', '%' . $filter . '%')
+                ->orderBy('url', $orderBy)
+                ->paginate($perPage);
 
             return [
                 'success' => true,
-                'links' => $links,
+                'shortcuts' => $links,
             ];
         } catch (\Exception $e) {
             return [
+                'success' => false,
+                'error' => true,
+                'error_message' => $e->getMessage()
+            ];
+        }
+    }
+    /**
+     * Método responsável por recuperar todos os links desabilitados conforme paginação
+     *
+     * @return array
+     */
+    public function getAllDisabled(): array
+    {
+        try {
+            $perPage = request('perPage', 2);
+            $orderBy = request('orderBy', 'DESC');
+            $filter = request('filter', '');
+            $now = new Carbon();
+            $links = $this->entity
+                ->select('*', DB::raw('IF(expiration_date < "' . $now . '", true, false) AS expired'), DB::raw('true AS disabled'))
+                ->withTrashed()
+                ->where([
+                    ['url', 'like' , '%' . $filter . '%'],
+                    [ 'deleted_at' , '!=', null]
+                ])
+                ->orderBy('url', $orderBy)
+                ->paginate($perPage);
+
+            return [
                 'success' => true,
+                'shortcuts' => $links,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => true,
                 'error_message' => $e->getMessage()
             ];
         }
@@ -57,6 +97,13 @@ class ShortenerRepository
     public function createNewShortcut(string $url, string $slug): array
     {
         try {
+            $linkExists = $this->entity->where('url', $url)->exists();
+            if ($linkExists) {
+                return [
+                    'success' => false,
+                    'message' => 'Este link já está encurtado'
+                ];
+            }
             $link = new Shortener;
             $link->url = $url;
             $link->slug = $slug;
@@ -71,6 +118,7 @@ class ShortenerRepository
             Log::error($e);
             return [
                 'success' => false,
+                'error' => true,
                 'error_message' => $e->getMessage()
             ];
         }
@@ -87,7 +135,6 @@ class ShortenerRepository
         try {
             $link = $this->entity->where('slug', $slug)
                 ->where('expiration_date', '>', now())
-                ->where('disable', '=', false)
                 ->first();
 
             if (!$link) {
@@ -105,6 +152,7 @@ class ShortenerRepository
         } catch (\Exception $e) {
             return [
                 'success' => false,
+                'error' => true,
                 'error_message' => $e->getMessage()
             ];
         }
@@ -119,28 +167,29 @@ class ShortenerRepository
     {
 
         try {
-            $link = $this->entity->where('id', $id)
-                ->where('disable', '=', false)
+            $link = $this
+                ->entity
+                ->where('id', $id)
                 ->first();
+
             if (!$link) {
                 return [
                     'success' => false,
-                    'message' => 'Esse link não pode ser desativado!'
+                    'message' => 'Esse link não pode ser desabilitado!'
                 ];
             }
 
-            $link->disable = true;
-            $link->expiration_date = new Carbon;
-            $link->save();
+            $link->delete();
 
             return [
                 'success' => true,
                 'data' => ['id' => $link->id],
-                'message' => "O link {$link->slug} foi desativado com sucesso!"
+                'message' => "O link {$link->slug} foi desabilitado com sucesso!"
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
+                'error' => true,
                 'error_message' => $e->getMessage()
             ];
         }
@@ -179,9 +228,11 @@ class ShortenerRepository
         } catch (\Exception $e) {
             return [
                 'success' => false,
+                'error' => true,
                 'error_message' => $e->getMessage()
             ];
         }
     }
+
 
 }

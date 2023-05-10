@@ -28,7 +28,7 @@ class ShortenerController extends Controller
     public function index(string $slug): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->getBySlug($slug);
-        if (!$response['success']) {
+        if (array_key_exists('error',$response)) {
             return Response::notFound($response);
         }
         return Response::success($response);
@@ -44,7 +44,7 @@ class ShortenerController extends Controller
     public function store(ShortenerRequest $request): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->createShortcut($request->url);
-        if (!$response['success']) {
+        if (array_key_exists('error',$response)) {
             return Response::notFound($response);
         }
         return Response::created($response);
@@ -56,10 +56,23 @@ class ShortenerController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show(): \Illuminate\Http\JsonResponse
+    public function show(Request $request): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->get();
-        if (!$response['success']) {
+        if (array_key_exists('error',$response)) {
+            return Response::notFound($response);
+        }
+        return Response::success($response);
+    }
+     /**
+     * Método responsável por retornar os links desabilitados conforme paginação
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showDisabled(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $response = $this->shortenerServices->getDisabled();
+        if (array_key_exists('error',$response)) {
             return Response::notFound($response);
         }
         return Response::success($response);
@@ -74,7 +87,7 @@ class ShortenerController extends Controller
     public function reactivate($id): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->reactivate($id);
-        if (!$response['success']) {
+        if (array_key_exists('error',$response)) {
             return Response::notFound($response);
         }
         return Response::success($response);
@@ -89,7 +102,7 @@ class ShortenerController extends Controller
     public function disable($id): \Illuminate\Http\JsonResponse
     {
         $response = $this->shortenerServices->disable($id);
-        if (!$response['success']) {
+        if (array_key_exists('error',$response)) {
             return Response::notFound($response);
         }
         return Response::success($response);
