@@ -1,5 +1,6 @@
 # URL SHORTCUT API
 
+> Status - Em desenvolvimento
 ### Comandos
 * php migrate
 * php artisan serve
@@ -38,7 +39,7 @@ HASHIDS_MIN_LENGTH=8
     <tbody>
         <tr>
             <td>GET</td>
-            <td>/links?page=2&perPage=1&orderBy=desc&filter=google<td>
+            <td>/links?page=2&perPage=1&orderBy=desc&filter=google</td>
             <td>Tráz apenas os links habilitados, pode-se passar a páginação, a orderm e filtrar por url</td>
         </tr>
         <tr>
@@ -48,17 +49,17 @@ HASHIDS_MIN_LENGTH=8
         </tr>
         <tr>
             <td>GET</td>
-            <td>/links/slug/{slug}<td>
+            <td>/links/slug/{slug}</td>
             <td>Traz o link pelo slug</td>
         </tr>
         <tr>
             <td>DELETE</td>
-            <td>/links/disable/{id}<td>
+            <td>/links/disable/{id}</td>
             <td>Desabilita um link pelo id</td>
         </tr>
          <tr>
             <td>GET</td>
-            <td>/links/disabled<td>
+            <td>/links/disabled</td>
             <td>Tráz os links desabilitados</td>
         </tr>
         <tr>
